@@ -73,10 +73,10 @@ class HomeViewModel @Inject constructor(
                 paysList = mutableListOf()
             )
 
-            var file_name = SimpleDateFormat("dd-MM-yy").format(Date(System.currentTimeMillis()))
+            var file_name = "Backup_"+SimpleDateFormat("dd-MM-yy").format(Date(System.currentTimeMillis()))
                 .toString() + ".csv"
 
-            pathCSV = mContext.getExternalFilesDir(null)!!.absolutePath + "/Pays_CSV"
+            pathCSV = mContext.getExternalFilesDir(null)!!.absolutePath + "/Backup_CSV"
             val dir = File(pathCSV)
             if (!dir.exists()) {
                 dir.mkdir()
@@ -84,7 +84,7 @@ class HomeViewModel @Inject constructor(
             homesate.value.listloans.onEachIndexed { index, it ->
                 homesate.value.loanList.add(
                     listOf(
-                        index.toString(),
+                        (index+1).toString(),
                         it.DebtorName,
                         it.LoneAmount.toString(),
                         SimpleDateFormat("dd-MM-yyyy").format(it.timeStamp),
@@ -106,7 +106,7 @@ class HomeViewModel @Inject constructor(
             homesate.value.listpay.onEachIndexed { index, it ->
                 homesate.value.paysList.add(
                     listOf(
-                        index.toString(),
+                        (index+1).toString(),
                         it.debtorName,
                         it.amount.toString(),
                         SimpleDateFormat("dd-MM-yyyy").format(it.timeStamp)

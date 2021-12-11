@@ -1,26 +1,39 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.Lone.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
 import com.example.dailymoneyrecord.recorde_Book.domain.model.Debtor
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.Pink500
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.option1
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.option2
 
 @ExperimentalMaterialApi
 @Composable
 fun LoanAutoCompleteDebtor(
     debtors: List<Debtor>,
-    getLoans: (Int?) -> Unit
+    getLoans: (Int?) -> Unit,
+    color: Color= Color.Transparent
 
 ) {
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = color)
+            .padding(bottom = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
         val options = debtors
         var textName by remember { mutableStateOf("") }
         var id: Int? by remember {
@@ -31,11 +44,10 @@ fun LoanAutoCompleteDebtor(
         }
 //            Log.d("Checkid1", "DebtorScreen: $id")
         if (textName.isBlank()) {
-            id=null
+            id = null
             getLoans(id)
 
-        }
-        else
+        } else
             getLoans(id)
 
         ExposedDropdownMenuBox(
@@ -49,13 +61,18 @@ fun LoanAutoCompleteDebtor(
                 onValueChange = {
                     textName = it
                 },
-                label = { Text("Name") },
+                placeholder = { Text(text = "Name") },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
                         expanded = isExpand
                     )
                 },
-                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = option1,
+                    unfocusedBorderColor = option2,
+                    backgroundColor = Color.White,
+
+                    ),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Done
@@ -73,10 +90,10 @@ fun LoanAutoCompleteDebtor(
                     filteringOptions.forEach { debtor ->
                         DropdownMenuItem(
                             onClick = {
-                                textName=debtor.name
-                                id=debtor.debtorId
+                                textName = debtor.name
+                                id = debtor.debtorId
                                 getLoans(id)
-                                isExpand=false
+                                isExpand = false
 
                             }
                         ) {

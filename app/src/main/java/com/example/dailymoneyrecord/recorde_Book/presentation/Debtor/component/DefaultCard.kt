@@ -37,7 +37,7 @@ fun DefaultCard(
     color: Int,
     textDate: Long,
     textAmount: String,
-    textAmountType: String,
+    textAmountType: String = "",
     onClickDelete: () -> Unit,
     onClickEdit: () -> Unit,
     onClickLone: () -> Unit = {},
@@ -97,7 +97,10 @@ fun DefaultCard(
                 }
 
             }
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(text = textAmount, color = text_amount, style = MaterialTheme.typography.h6)
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -118,18 +121,28 @@ fun DefaultCard(
             DropdownMenuItem(onClick = {
                 onClickDelete()
                 isExpand = false
-            }, enabled = delete) {
-                Row(modifier = Modifier.weight(1f),horizontalArrangement = Arrangement.SpaceBetween) {
+            }, enabled = delete
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
 
                     Text(text = "Delete")
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "delete")
                 }
             }
             DropdownMenuItem(
-                onClick = onClickEdit,
+                onClick = {
+                    onClickEdit()
+                    isExpand = false
+                },
                 enabled = edit,
             ) {
-                Row(modifier = Modifier.weight(1f),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
 
                     Text(text = "Edit")
                     Icon(imageVector = Icons.Default.Edit, contentDescription = "edit")
@@ -141,7 +154,10 @@ fun DefaultCard(
                 enabled = lone,
 
                 ) {
-                Row(modifier = Modifier.weight(1f),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
 
                     Text(text = "AddLoan")
                     Icon(imageVector = Icons.Default.Money, contentDescription = "loan")
@@ -151,7 +167,10 @@ fun DefaultCard(
                 onClick = onPaysClick,
                 enabled = pays,
             ) {
-                Row(modifier = Modifier.weight(1f),horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
 
                     Text(text = "GetPays")
                     Icon(imageVector = Icons.Default.MonetizationOn, contentDescription = "pays")
@@ -163,7 +182,6 @@ fun DefaultCard(
 
     }
 }
-
 
 
 //@Preview

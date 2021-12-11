@@ -16,5 +16,6 @@ data class DailyState(
     var debtorId: Int? = null,
     var dateStamp: Long = SimpleDateFormat("yyyy-MM-dd").parse(Date(System.currentTimeMillis()).toString()).time,
     val debtors: List<Debtor> = emptyList(),
-    val totalAmount: Int = 0
+    val totalAmount: Int = 0,
+    val debtorExist:Boolean=false
 )

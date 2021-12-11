@@ -66,6 +66,7 @@ fun AutoCompleteDebtor(
                     )
                     id = null;
                     textName = ""
+                    isExpand=false
                 })
             )
             // filter options based on text field value

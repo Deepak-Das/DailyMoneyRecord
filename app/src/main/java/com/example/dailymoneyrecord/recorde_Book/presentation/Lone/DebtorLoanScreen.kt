@@ -203,6 +203,7 @@ fun DebtorLoanScreen(
                             LONE_STATUS = it.status
                             LONE_AMOUNT = it.LoneAmount.toString()
                             LONE_TIME = it.timeStamp
+                            dateNow=it.timeStamp
                             LONE_Holder = it.debtorId
                             editAlert = true
 
@@ -210,6 +211,7 @@ fun DebtorLoanScreen(
                         },
                         lone = false,
                         pays = true,
+                        delete=false,
                         onPaysClick = { navController.navigate(Screens.PaymentsScreen.route + "?debtorId=${it.debtorId}&timeStamp=${it.timeStamp}&debtorName=${it.DebtorName}&loan=${it.LoneAmount}") }
                     )
                 }
@@ -217,8 +219,9 @@ fun DebtorLoanScreen(
         }
 
         if (editAlert) {
+
             AlertDialog(onDismissRequest = { editAlert = false },
-                title = { Text(text = "Change Status ID#$LONE_ID") },
+                title = { Text(text = "CHANGE STATUS ID#$LONE_ID \n") },
                 text = {
                     Column(Modifier.fillMaxWidth()) {
                         TextField(value = LONE_NAME, onValueChange = {}, enabled = false)
@@ -227,6 +230,25 @@ fun DebtorLoanScreen(
                             value = LONE_AMOUNT, onValueChange = { LONE_AMOUNT = it },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
 
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        //TODO: Date problem
+                        OutlinedTextField(
+                            modifier = Modifier.onFocusChanged { picker = it.hasFocus },
+                            value = SimpleDateFormat("dd-MM-yyyy").format(Date(dateNow)).toString(), onValueChange = {},
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = "Date",
+                                    Modifier.clickable { picker = !picker })
+                            },
+                            maxLines = 1,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                trailingIconColor = Pink800,
+                                focusedBorderColor = Pink500
+                            ),
+                            readOnly = true,
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Row(Modifier.fillMaxWidth()) {
@@ -240,6 +262,7 @@ fun DebtorLoanScreen(
                                 Text(text = "Running")
 
                             }
+
                             Spacer(modifier = Modifier.width(6.dp))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
@@ -262,13 +285,16 @@ fun DebtorLoanScreen(
                                     LONE_ID,
                                     LONE_Holder,
                                     LONE_AMOUNT.toInt(),
-                                    LONE_TIME,
+                                    dateNow,
                                     LONE_STATUS
                                 )
                             )
                         )
                         editAlert = false
-                    }) {
+                        dateNow=SimpleDateFormat("yyyy-MM-dd").parse(Date(System.currentTimeMillis()).toString()).time
+                    },
+                    colors=ButtonDefaults.buttonColors(backgroundColor = option2, contentColor = Color.White )
+                        ) {
                         Text("Done")
 
                     }
@@ -278,7 +304,8 @@ fun DebtorLoanScreen(
 
         LoanAutoCompleteDebtor(debtors = state.debtors, getLoans = {
             viewModel.onEvent(Event.LoneByName(it))
-        })
+        },color = Pink500)
+
 
 
     }

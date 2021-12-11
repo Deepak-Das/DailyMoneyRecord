@@ -1,16 +1,19 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.Payments
 
 
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.FileProvider
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +24,7 @@ import com.example.dailymoneyrecord.recorde_Book.domain.util.OrderBy
 import com.example.dailymoneyrecord.recorde_Book.domain.util.OrderType
 import com.example.dailymoneyrecord.recorde_Book.presentation.Daily.Event
 import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
@@ -37,22 +41,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
+import java.sql.Date
 import java.text.SimpleDateFormat
 import javax.inject.Inject
-import androidx.core.content.FileProvider
-import android.content.ActivityNotFoundException
-import androidx.core.content.ContextCompat
-
-import androidx.core.content.ContextCompat.startActivity
-import android.content.ComponentName
-import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.sql.Date
 
 
 @HiltViewModel
@@ -171,116 +165,168 @@ class PaymentViewModel @Inject constructor(
     }
 
     fun pdfGenerate(mContext: Context) {
-        if(paymentState.value.paymentList.isEmpty()){
-            Toast.makeText(mContext,"PayList is Empty",Toast.LENGTH_SHORT).show()
+
+        if (paymentState.value.paymentList.isEmpty()) {
+            Toast.makeText(mContext, "PayList is Empty", Toast.LENGTH_SHORT).show()
             return
         }
 
-
-        var file_name="${paymentState.value.paymentList[0].debtorName}_${SimpleDateFormat("dd-MM-YYYY").format(Date(System.currentTimeMillis())).toString()}.pdf"
-
-        val path = mContext.getExternalFilesDir(null)!!.absolutePath + "/Pays_PDF"
-
-        val s = Environment.getExternalStorageState()
-        Log.i(TAG, "pdfGenerate: $s")
-
-        val dir = File(path)
-        if (!dir.exists()) {
-            dir.mkdir()
-        }
-        val file = File(path, file_name)
+        viewModelScope.launch {
 
 
-        val pdfDocument = PdfDocument(PdfWriter(file))
-        pdfDocument.defaultPageSize = PageSize.A4
+            var file_name = "${paymentState.value.paymentList[0].debtorName}_${
+                SimpleDateFormat("dd-MM-YY").format(Date(System.currentTimeMillis()))
+            }.pdf"
 
-        val document = Document(pdfDocument)
-
-
-        val bitmap = BitmapFactory.decodeResource(mContext.resources, R.drawable.maa_tera)
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(
-            Bitmap.CompressFormat.JPEG,
-            100, stream
-        )
-        val b: ByteArray = stream.toByteArray()
-
-        val data = ImageDataFactory.create(b);
-        val img = Image(data)
-        img.scaleAbsolute(150F, 150F)
-        img.setHorizontalAlignment(HorizontalAlignment.CENTER)
-        img.setBorderRadius(BorderRadius(16F))
-        img.setMarginBottom(10F)
-        img.strokeWidth = 2F
-
-        if (Amount !== null && name != null) {
-            var namePDf = Paragraph(name)
-            var amoutPDF = Paragraph("Rs. $Amount /-")
-            document.add(namePDf)
-            document.add(amoutPDF)
-        } else {
-            var namepdf2 = paymentState.value.paymentList[0].debtorName
-            document.add(Paragraph(namepdf2))
-        }
+            val path = mContext.getExternalFilesDir(null)!!.absolutePath + "/Pays_PDF"
 
 
+            val dir = File(path)
+            if (!dir.exists()) {
+                dir.mkdir()
+            }
+            val file = File(path, file_name)
 
-        document.add(img)
 
-        val table =
-            Table(UnitValue.createPercentArray(floatArrayOf(15f, 15f, 12f))).useAllAvailableWidth()
+            val pdfDocument = PdfDocument(PdfWriter(file))
+            pdfDocument.defaultPageSize = PageSize.A4
 
-        table.addHeaderCell(Cell().add(Paragraph("ID").setTextAlignment(TextAlignment.CENTER)))
-        table.addHeaderCell(Cell().add(Paragraph("Date").setTextAlignment(TextAlignment.CENTER)))
-        table.addHeaderCell(Cell().add(Paragraph("pays_Amount").setTextAlignment(TextAlignment.CENTER)))
+            val document = Document(pdfDocument)
 
-        paymentState.value.paymentList.onEachIndexed { index,entry->
+
+            val bitmap = BitmapFactory.decodeResource(mContext.resources, R.drawable.maa_tera)
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                100, stream
+            )
+            val b: ByteArray = stream.toByteArray()
+
+            val data = ImageDataFactory.create(b)
+            val img = Image(data)
+            img.scaleAbsolute(150F, 150F)
+            img.setHorizontalAlignment(HorizontalAlignment.CENTER)
+            img.setBorderRadius(BorderRadius(16F))
+            img.setMarginBottom(10F)
+            img.strokeWidth = 2F
+
+            document.add(img)
+            val title = "JAI MAA TERA"
+            document.add(
+                Paragraph(title)
+                    .setHorizontalAlignment(HorizontalAlignment.CENTER)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+            )
+
+
+            if (Amount !== null && name != null) {
+                var namePDf = Paragraph(name)
+                var amoutPDF = Paragraph("Rs. $Amount /-")
+                document.add(namePDf.setBold())
+                document.add(amoutPDF.setBold())
+            } else {
+                var namepdf2 = paymentState.value.paymentList[0].debtorName
+                document.add(Paragraph(namepdf2).setBold())
+            }
+
+
+            val table =
+                Table(
+                    UnitValue.createPercentArray(
+                        floatArrayOf(
+                            15f,
+                            15f,
+                            12f
+                        )
+                    )
+                ).useAllAvailableWidth()
+
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("SL NO.").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("Date").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("Pays_Amount").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+
+            paymentState.value.paymentList.onEachIndexed { index, entry ->
+                table.addCell(
+                    Cell().add(
+                        Paragraph((index + 1).toString()).setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+                table.addCell(
+                    Cell().add(
+                        Paragraph(SimpleDateFormat("dd-MM-yyyy").format(entry.timeStamp)).setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+                table.addCell(
+                    Cell().add(
+                        Paragraph("Rs. ${entry.amount} /-").setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+            }
             table.addCell(
                 Cell().add(
-                    Paragraph((index+1).toString()).setTextAlignment(
-                        TextAlignment.CENTER
-                    )
+                    Paragraph("Total").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
                 )
             )
             table.addCell(
                 Cell().add(
-                    Paragraph(SimpleDateFormat("dd-MM-yyyy").format(entry.timeStamp)).setTextAlignment(
-                        TextAlignment.CENTER
-                    )
+                    Paragraph("-").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
                 )
             )
             table.addCell(
                 Cell().add(
-                    Paragraph("Rs. ${entry.amount.toString()} /-").setTextAlignment(
+                    Paragraph(paymentState.value.totalAmount.toString()).setTextAlignment(
                         TextAlignment.CENTER
-                    )
+                    ).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
                 )
             )
-        }
-        document.add(table)
 
-        document.close()
-
-
-        // TODO: Intent to open pdf
+            document.add(table)
+            document.close()
 
 
-
-       viewModelScope.launch {
-           val uri= FileProvider.getUriForFile(mContext, mContext.packageName.toString()+".provider",file)
-           val i = Intent()
-           i.action = Intent.ACTION_VIEW
-           i.data = uri
+            val uri = FileProvider.getUriForFile(
+                mContext,
+                mContext.packageName.toString() + ".provider",
+                file
+            )
+            val i = Intent()
+            i.action = Intent.ACTION_VIEW
+            i.data = uri
 //           i.type="application/pdf"
-           i.flags=Intent.FLAG_GRANT_READ_URI_PERMISSION
-           i.component = ComponentName("com.adobe.reader", "com.adobe.reader.AdobeReader")
-           Log.i(TAG, "pdfGenerate: $uri")
-           try {
-               mContext.startActivity(i)
-           } catch (e: ActivityNotFoundException) {
-               Log.i("App_Tag", "Exception - " + e.message)
-           }
-       }
+            i.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            i.component = ComponentName("com.adobe.reader", "com.adobe.reader.AdobeReader")
+            Log.i(TAG, "pdfGenerate: $uri")
+            try {
+                mContext.startActivity(i)
+            } catch (e: ActivityNotFoundException) {
+                Log.i("App_Tag", "Exception - " + e.message)
+            }
+        }
 
     }
 

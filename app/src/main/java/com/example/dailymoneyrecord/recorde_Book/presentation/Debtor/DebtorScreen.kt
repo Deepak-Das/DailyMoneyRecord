@@ -1,5 +1,7 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.util
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,10 +28,11 @@ import com.example.dailymoneyrecord.recorde_Book.presentation.theme.Pink500
 @ExperimentalComposeUiApi
 @Composable
 fun DebtorScreen(
-    viewModel: DebtorViewModel = hiltViewModel()
+    viewModel: DebtorViewModel = hiltViewModel(),
+    mContext: Context = LocalContext.current
 ) {
 
-    val (focusRequester) = FocusRequester.createRefs()
+//    val focusRequester = FocusRequester.createRefs()
 
     val state = viewModel.debtorState.value
 
@@ -37,6 +40,7 @@ fun DebtorScreen(
     var dateTimeStamp by remember {
         mutableStateOf(System.currentTimeMillis())
     }
+
 
 
 
@@ -69,10 +73,12 @@ fun DebtorScreen(
                         textName = debtor.name,
                         textDate = debtor.timestamp,
                         textAmount = "N/A",
-                        textAmountType = "Detail ID#${debtor.debtorId}",
+                        textAmountType = "ID#${debtor.debtorId}",
                         color = debtor.color,
                         onClickDelete = { viewModel.delete(debtor) },
                         onClickEdit = {}, edit = false,
+                        delete = false,
+                        lone = false
                     )
 
                 }
@@ -82,7 +88,9 @@ fun DebtorScreen(
 
         AutoCompleteDebtor(
             debtors = state.debtors,
-            insertDebtor = { viewModel.insert(it) },
+            insertDebtor = {
+                    viewModel.insert(it,mContext)
+            },
             timeStamp = dateTimeStamp
         )
 

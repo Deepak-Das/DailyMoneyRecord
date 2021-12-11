@@ -1,21 +1,46 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.Daily
 
+import android.content.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.FileProvider
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dailymoneyrecord.R
 import com.example.dailymoneyrecord.recorde_Book.domain.model.DailyPayment
 import com.example.dailymoneyrecord.recorde_Book.domain.model.DebtorPayment
 import com.example.dailymoneyrecord.recorde_Book.domain.use_case.DebtorUseCase
 import com.example.dailymoneyrecord.recorde_Book.domain.util.OrderBy
 import com.example.dailymoneyrecord.recorde_Book.domain.util.OrderType
+import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Image
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.property.BorderRadius
+import com.itextpdf.layout.property.HorizontalAlignment
+import com.itextpdf.layout.property.TextAlignment
+import com.itextpdf.layout.property.UnitValue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.sql.Date
+import java.text.SimpleDateFormat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,11 +81,12 @@ class DailyViewModel @Inject constructor(
                             dailyState.value.textAmount.toInt(),
                             dailyState.value.dateStamp
                         ))
+                        setDebId(null)
+                        setName("")
+                        setAmount("")
                     }
                 }
-                setDebId(null)
-                setName("")
-                setAmount("")
+
             }
             is Event.onDelete->{
                 viewModelScope.launch { useCase.deletePayment(event.payment) }
@@ -129,5 +155,169 @@ class DailyViewModel @Inject constructor(
             debtorId = debId
         )
     }
+
+    fun pdfGenerate(mContext: Context) {
+
+        if (dailyState.value.payments.isEmpty()) {
+            Toast.makeText(mContext, "Payments is Empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewModelScope.launch {
+
+
+            var file_name = "daily pays_${
+                SimpleDateFormat("dd-MM-YY").format(dailyState.value.dateStamp)
+            }.pdf"
+
+            val path = mContext.getExternalFilesDir(null)!!.absolutePath + "/Daily_PDF"
+
+            val s = Environment.getExternalStorageState()
+            Log.i(ContentValues.TAG, "pdfGenerate: $s")
+
+            val dir = File(path)
+            if (!dir.exists()) {
+                dir.mkdir()
+            }
+            val file = File(path, file_name)
+
+
+            val pdfDocument = PdfDocument(PdfWriter(file))
+            pdfDocument.defaultPageSize = PageSize.A4
+
+            val document = Document(pdfDocument)
+
+
+            val bitmap = BitmapFactory.decodeResource(mContext.resources, R.drawable.maa_tera)
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(
+                Bitmap.CompressFormat.JPEG,
+                100, stream
+            )
+            val b: ByteArray = stream.toByteArray()
+
+            val data = ImageDataFactory.create(b)
+            val img = Image(data)
+            img.scaleAbsolute(150F, 150F)
+            img.setHorizontalAlignment(HorizontalAlignment.CENTER)
+            img.setBorderRadius(BorderRadius(16F))
+            img.setMarginBottom(10F)
+            img.strokeWidth = 2F
+
+            document.add(Paragraph("Date :- ${ SimpleDateFormat("dd-MM-YY").format(dailyState.value.dateStamp) }").setBold())
+
+            document.add(img)
+            val title = "JAI MAA TERA"
+            document.add(
+                Paragraph(title)
+                    .setHorizontalAlignment(HorizontalAlignment.CENTER)
+                    .setBold()
+                    .setTextAlignment(TextAlignment.CENTER)
+            )
+
+
+
+            val table =
+                Table(
+                    UnitValue.createPercentArray(
+                        floatArrayOf(
+                            15f,
+                            15f,
+                            12f
+                        )
+                    )
+                ).useAllAvailableWidth()
+
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("Name").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("Date").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+            table.addHeaderCell(
+                Cell().add(
+                    Paragraph("Pays_Amount").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.ORANGE)
+                )
+            )
+
+            var daily_pays:List<DailyPayment> = dailyState.value.payments.sortedBy { it.debtorName }
+
+            daily_pays.onEachIndexed { index, entry ->
+                table.addCell(
+                    Cell().add(
+                        Paragraph(entry.debtorName).setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+                table.addCell(
+                    Cell().add(
+                        Paragraph(SimpleDateFormat("dd-MM-yyyy").format(entry.timeStamp)).setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+                table.addCell(
+                    Cell().add(
+                        Paragraph("Rs. ${entry.amount} /-").setTextAlignment(
+                            TextAlignment.CENTER
+                        )
+                    )
+                )
+            }
+            table.addCell(
+                Cell().add(
+                    Paragraph("Total").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
+                )
+            )
+            table.addCell(
+                Cell().add(
+                    Paragraph("-").setTextAlignment(TextAlignment.CENTER).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
+                )
+            )
+            table.addCell(
+                Cell().add(
+                    Paragraph("Rs. ${dailyState.value.totalAmount.toString()} /-").setTextAlignment(
+                        TextAlignment.CENTER
+                    ).setBold()
+                        .setBackgroundColor(ColorConstants.GREEN)
+                )
+            )
+
+            document.add(table)
+            document.close()
+
+            Toast.makeText(mContext,"wait pdf in progress...",Toast.LENGTH_SHORT).show()
+
+
+            val uri = FileProvider.getUriForFile(
+                mContext,
+                mContext.packageName.toString() + ".provider",
+                file
+            )
+            val i = Intent()
+            i.action = Intent.ACTION_VIEW
+            i.data = uri
+            i.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            i.component = ComponentName("com.adobe.reader", "com.adobe.reader.AdobeReader")
+            Log.i(ContentValues.TAG, "pdfGenerate: $uri")
+            try {
+                mContext.startActivity(i)
+            } catch (e: ActivityNotFoundException) {
+                Log.i("App_Tag", "Exception - " + e.message)
+            }
+        }
+
+    }
+
 
 }

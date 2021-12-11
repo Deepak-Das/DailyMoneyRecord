@@ -1,5 +1,6 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.Daily.component
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
@@ -11,14 +12,18 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.dailymoneyrecord.recorde_Book.domain.model.Debtor
-import com.example.dailymoneyrecord.recorde_Book.presentation.theme.*
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.Pink500
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.Shapes
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.buttonEdit
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.option1
 
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
@@ -36,6 +41,7 @@ fun DefaultAutoComplete(
         mutableStateOf(false)
     }
 
+
     val focusRequesterName = FocusRequester()
     val focusRequesterAmount = FocusRequester()
 
@@ -46,41 +52,44 @@ fun DefaultAutoComplete(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+//        BackHandler(onBack ={flag=false})
+
         Spacer(modifier = Modifier.height(10.dp))
 
 
         ExposedDropdownMenuBox(expanded = expand, onExpandedChange = { expand = !expand }) {
 
 
-
-
-                OutlinedTextField(
-                    modifier = Modifier.focusRequester(focusRequesterName),
-                    value = name,
-                    onValueChange = { setName(it) },
-                    placeholder = { Text(text = "Name") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = Color.White,unfocusedBorderColor = option1,unfocusedLabelColor = buttonEdit
-                    ),
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = expand
-                        )
+            OutlinedTextField(
+                modifier = Modifier
+                    .focusRequester(focusRequesterName).onFocusChanged { focusState ->
+                        expand=focusState.isFocused
                     },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = {
-                            if (name.isBlank()){
-                                focusRequesterName.captureFocus()
-                            }
+                value = name,
+                onValueChange = { setName(it) },
+                placeholder = { Text(text = "Name") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    backgroundColor = Color.White,
+                    unfocusedBorderColor = option1,
+                    unfocusedLabelColor = buttonEdit
+                ),
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expand
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        if (name.isBlank()) {
+                            focusRequesterName.captureFocus()
+                        }
 
-                        })
-                )
-
-
+                    })
+            )
 
 
 //=============================================================
@@ -113,7 +122,9 @@ fun DefaultAutoComplete(
             onValueChange = { setAmount(it) },
             placeholder = { Text(text = "Amount") },
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = Color.White,unfocusedBorderColor = option1,unfocusedLabelColor = buttonEdit
+                backgroundColor = Color.White,
+                unfocusedBorderColor = option1,
+                unfocusedLabelColor = buttonEdit
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,

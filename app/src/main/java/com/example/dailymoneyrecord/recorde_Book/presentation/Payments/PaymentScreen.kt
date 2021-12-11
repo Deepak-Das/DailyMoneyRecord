@@ -1,6 +1,7 @@
 package com.example.dailymoneyrecord.recorde_Book.presentation.Payments
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,6 +25,8 @@ import com.example.dailymoneyrecord.recorde_Book.presentation.Debtor.component.D
 import com.example.dailymoneyrecord.recorde_Book.presentation.Debtor.component.DefaultDisplayBox
 import com.example.dailymoneyrecord.recorde_Book.presentation.Lone.component.LoanAutoCompleteDebtor
 import com.example.dailymoneyrecord.recorde_Book.presentation.theme.Pink500
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.option2
+import com.example.dailymoneyrecord.recorde_Book.presentation.theme.option6
 import com.example.dailymoneyrecord.recorde_Book.presentation.util.Filter
 
 @ExperimentalMaterialApi
@@ -67,7 +71,8 @@ fun PaymentScreen(
 
             Button(
                 onClick = { paystoggle = !paystoggle },
-                colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors(backgroundColor = option6 ,contentColor = Color.White),
+                shape = RoundedCornerShape(30)
             ) {
                 Text(text = "CLICK TO GET PAYS BY NAME")
             }
@@ -84,11 +89,11 @@ fun PaymentScreen(
         if (paystoggle) {
             AlertDialog(
                 onDismissRequest = { paystoggle = false },
-                title = { Text(text = "Type Name and set limit") },
+                title = { Text(text = "TYPE NAME AND SET LIMIT\n",fontWeight = FontWeight.Bold) },
                 text = {
 
                     Column(Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         LoanAutoCompleteDebtor(
                             debtors = state.debtorList,
                             getLoans = {
@@ -119,7 +124,8 @@ fun PaymentScreen(
                             st = if (st.isEmpty()) "0" else st
                             viewModel.onEvent(Event.Limit(state.debtorId, st.toInt(), ed.toInt()))
                         },
-                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                        colors = ButtonDefaults.buttonColors(backgroundColor = option2,contentColor = Color.White),
+                        shape = RoundedCornerShape(40)
                     ) {
                         Text(text = "Search")
                     }
@@ -162,14 +168,14 @@ fun PaymentScreen(
             Button(
                 onClick = { viewModel.pdfGenerate(mContext) },
                 shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors(backgroundColor = option2 ,contentColor = Color.White)
             ) {
                 Text(text = "Generate PDF")
             }
             Button(
-                onClick = { },
+                onClick = { Toast.makeText(mContext,"this button is disable",Toast.LENGTH_SHORT).show() },
                 shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(contentColor = Color.White)
+                colors = ButtonDefaults.buttonColors( backgroundColor = option2 ,contentColor = Color.White)
             ) {
                 Text(text = "Generate CSV")
             }
