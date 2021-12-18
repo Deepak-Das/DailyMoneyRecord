@@ -87,6 +87,7 @@ fun DebtorScreen(
 
 
         AutoCompleteDebtor(
+            label="Edit debtor name here..",
             debtors = state.debtors,
             insertDebtor = {
                     viewModel.insert(it,mContext)

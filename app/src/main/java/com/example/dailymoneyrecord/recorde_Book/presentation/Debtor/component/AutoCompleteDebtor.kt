@@ -16,6 +16,7 @@ import com.example.dailymoneyrecord.recorde_Book.domain.model.Debtor
 @ExperimentalMaterialApi
 @Composable
 fun AutoCompleteDebtor(
+    label:String = "Name",
     debtors: List<Debtor>,
     insertDebtor: (Debtor) -> Unit,
     timeStamp: Long,
@@ -43,7 +44,7 @@ fun AutoCompleteDebtor(
                 onValueChange = {
                     textName = it
                 },
-                label = { Text("Name") },
+                label = { Text(label) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(
                         expanded = isExpand

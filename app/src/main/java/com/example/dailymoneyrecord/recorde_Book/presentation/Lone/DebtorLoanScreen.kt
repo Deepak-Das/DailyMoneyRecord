@@ -290,6 +290,7 @@ fun DebtorLoanScreen(
                                 )
                             )
                         )
+                        LONE_ID=null
                         editAlert = false
                         dateNow=SimpleDateFormat("yyyy-MM-dd").parse(Date(System.currentTimeMillis()).toString()).time
                     },

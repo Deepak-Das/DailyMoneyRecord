@@ -85,9 +85,6 @@ fun HomeScreen(
                 Text("BACK-UP ALL DATA")
             }
 
-//            DefaultItem("ID: #24","Date: #12/10/21","Name: Kar Medical","Amount: 2000/-",)
-//            DefaultItem("ID: #24","Date: #12/10/21","Name: Kar Medical","Amount: 2000/-",)
-//            DefaultItem("ID: #24","Date: #12/10/21","Name: Kar Medical","Amount: 2000/-",)
         }
     }
 }

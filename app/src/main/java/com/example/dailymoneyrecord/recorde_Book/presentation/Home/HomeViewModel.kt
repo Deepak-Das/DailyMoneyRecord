@@ -42,8 +42,11 @@ class HomeViewModel @Inject constructor(
     var job2: Job? = null
 
     init {
-        getLoan()
-        getPays()
+        viewModelScope.launch {
+            getLoan()
+            getPays()
+        }
+
     }
 
     fun getLoan() {
@@ -52,7 +55,6 @@ class HomeViewModel @Inject constructor(
             _homeState.value = homesate.value.copy(
                 listloans = it
             )
-            Log.i(TAG, "getLoan: ${homesate.value.listloans}")
         }.launchIn(viewModelScope)
     }
 
@@ -73,8 +75,9 @@ class HomeViewModel @Inject constructor(
                 paysList = mutableListOf()
             )
 
-            var file_name = "Backup_"+SimpleDateFormat("dd-MM-yy").format(Date(System.currentTimeMillis()))
-                .toString() + ".csv"
+            var file_name =
+                "Backup_" + SimpleDateFormat("dd-MM-yy").format(Date(System.currentTimeMillis()))
+                    .toString() + ".csv"
 
             pathCSV = mContext.getExternalFilesDir(null)!!.absolutePath + "/Backup_CSV"
             val dir = File(pathCSV)
@@ -84,7 +87,7 @@ class HomeViewModel @Inject constructor(
             homesate.value.listloans.onEachIndexed { index, it ->
                 homesate.value.loanList.add(
                     listOf(
-                        (index+1).toString(),
+                        (index + 1).toString(),
                         it.DebtorName,
                         it.LoneAmount.toString(),
                         SimpleDateFormat("dd-MM-yyyy").format(it.timeStamp),
@@ -106,7 +109,7 @@ class HomeViewModel @Inject constructor(
             homesate.value.listpay.onEachIndexed { index, it ->
                 homesate.value.paysList.add(
                     listOf(
-                        (index+1).toString(),
+                        (index + 1).toString(),
                         it.debtorName,
                         it.amount.toString(),
                         SimpleDateFormat("dd-MM-yyyy").format(it.timeStamp)
@@ -142,8 +145,6 @@ class HomeViewModel @Inject constructor(
             } catch (e: ActivityNotFoundException) {
                 Log.i("App_Tag", "Exception - " + e.message)
             }
-
-
         }
     }
 

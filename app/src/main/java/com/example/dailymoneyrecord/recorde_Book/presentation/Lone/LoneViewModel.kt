@@ -57,6 +57,7 @@ class LoneViewModel @Inject constructor(
                 viewModelScope.launch {
                     useCase.insertLoan(event.debtorLoan)
                 }
+
             }
             is Event.LoneByName -> {
                 _loneState.value = loneState.value.copy(
